@@ -1,7 +1,7 @@
 # Unity3d UI Sprite Distortion Framework
 Unity3d shader and scripts to make uGUI sprite distortion
 
-![Youtube video with usage example](https://youtu.be/wUtYrXyHBgc)
+[Youtube video with usage example](https://youtu.be/wUtYrXyHBgc)
 
 <img width="1197" height="842" alt="{92CD87F9-7DB7-4390-A26E-059DF54DE9BF}" src="https://github.com/user-attachments/assets/fa28d95b-41f8-4817-8285-ed7f70ae5ed0" />
 
