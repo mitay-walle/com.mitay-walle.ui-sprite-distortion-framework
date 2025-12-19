@@ -1,0 +1,28 @@
+{
+  "name": "com.mitay-walle.ui-sprite-distortion-framework",
+  "version": "0.5.0",
+  "displayName": "UI Sprite Distortion Framework",
+  "description": "Unity3d shader and scripts to make uGUI sprite distortion",
+  "unity": "2018.4",
+    "keywords": [
+    "UI",
+    "Graphic",
+	"VFX",
+	"Special Effects"
+  ],
+	"documentationUrl": "https://github.com/mitay-walle/com.mitay-walle.ui-sprite-distortion-framework/blob/main/README.md",
+	"licensesUrl": "https://github.com/mitay-walle/com.mitay-walle.ui-sprite-distortion-framework/blob/main/LICENSE",
+  "author": {
+    "name": "mitay-walle",
+    "email": "mitay-walle91@mail.ru",
+    "url": "https://github.com/mitay-walle"
+  },
+  "samples": [
+    {
+      "displayName": "Usage Examples",
+      "description": "Contains scene with Grid Raw Image",
+      "path": "Samples~/Scenes"
+    }
+  ],
+  "author": "mitay-walle <mitay-walle91@mail.ru> (https://github.com/mitay-walle)"
+}
