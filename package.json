@@ -20,8 +20,8 @@
   "samples": [
     {
       "displayName": "Usage Examples",
-      "description": "Contains scene with Grid Raw Image",
-      "path": "Samples~/Scenes"
+      "description": "Scene with canvas, demonstrating masking, materials with different blending. Swirl uv noise texture",
+      "path": "Samples~"
     }
   ],
   "author": "mitay-walle <mitay-walle91@mail.ru> (https://github.com/mitay-walle)"
