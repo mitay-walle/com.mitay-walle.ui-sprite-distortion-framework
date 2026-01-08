@@ -1,6 +1,6 @@
 {
   "name": "com.mitay-walle.ui-sprite-distortion-framework",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "displayName": "UI Sprite Distortion Framework",
   "description": "Unity3d shader and scripts to make uGUI sprite distortion",
   "unity": "2018.4",
@@ -26,3 +26,4 @@
   ],
   "author": "mitay-walle <mitay-walle91@mail.ru> (https://github.com/mitay-walle)"
 }
+
