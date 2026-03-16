@@ -5,9 +5,6 @@ Unity3d shader and scripts to make uGUI sprite distortion
 
 ![](ui_distortion4.gif) ![](ui_distortion3.gif) ![](ui_distortion2.gif)
 
-### Configurable Blending
-<img width="1197" height="842" alt="{92CD87F9-7DB7-4390-A26E-059DF54DE9BF}" src="https://github.com/user-attachments/assets/fa28d95b-41f8-4817-8285-ed7f70ae5ed0" />
-
 ### UV Control Components
 <img width="587" height="293" alt="{286AC848-2E42-44D6-AA52-8EFADAE9F2FD}" src="https://github.com/user-attachments/assets/d7272eee-b276-4452-ad68-8b6498c6f97b" />
 
