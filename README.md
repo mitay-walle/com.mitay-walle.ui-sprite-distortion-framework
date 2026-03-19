@@ -3,7 +3,7 @@ Unity3d shader and scripts to make uGUI sprite distortion
 
 [Youtube video with usage example](https://youtu.be/wUtYrXyHBgc)
 
-![](ui_distortion4.gif) ![](ui_distortion3.gif) ![](ui_distortion2.gif)
+![](.github~/ui_distortion4.gif) ![](.github~/ui_distortion3.gif) ![](.github~/ui_distortion2.gif)
 
 ### UV Control Components
 <img width="587" height="293" alt="{286AC848-2E42-44D6-AA52-8EFADAE9F2FD}" src="https://github.com/user-attachments/assets/d7272eee-b276-4452-ad68-8b6498c6f97b" />
