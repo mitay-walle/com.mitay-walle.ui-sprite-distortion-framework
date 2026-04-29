@@ -26,6 +26,18 @@ namespace mitaywalle.UI
 		{
 			if (!IsActive()) return;
 
+            if (_set1UV)
+            {
+                graphic.canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1;
+            }
+			if (_set2UV)
+            {
+                graphic.canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord2;
+            }
+			if (_set3UV)
+            {
+                graphic.canvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord3;
+            }
 			int count = vh.currentVertCount;
 			UIVertex vert = new();
 
