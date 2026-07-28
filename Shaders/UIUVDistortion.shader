@@ -113,8 +113,13 @@ Shader "UI/UV Distortion"
 
                 float2 distortionUV = v.texcoord * (1.0 + OUT.params.w);
 
+                // Apply the Distortion Texture material Tiling and Offset explicitly.
+                distortionUV = distortionUV * _DistortionTex_ST.xy + _DistortionTex_ST.zw;
+
+                // Add animated and per-vertex offsets after material tiling,
+                // so changing Tiling does not change the scrolling speed.
                 float2 scrollOffset = float2(OUT.params.y, OUT.params.z) * _Time.y + v.texcoord2.xy;
-                OUT.distortionUV = TRANSFORM_TEX(distortionUV + scrollOffset, _DistortionTex);
+                OUT.distortionUV = distortionUV + scrollOffset;
 
                 if(_InvertAlpha > 0.5)
                 {
