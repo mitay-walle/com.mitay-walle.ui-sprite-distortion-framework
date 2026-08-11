@@ -28,7 +28,7 @@ public class UVScrollEffect : BaseMeshEffect
 	public override void ModifyMesh(VertexHelper vh)
 	{
 		if (!IsActive()) return;
-		if (!_playEditor || Application.isPlaying) return;
+		if (!_playEditor && Application.isPlaying) return;
 
 		int vertCount = vh.currentVertCount;
 
@@ -56,7 +56,7 @@ public class UVScrollEffect : BaseMeshEffect
 #if UNITY_EDITOR
         private void Repaint()
         {
-            if (!_playEditor || Application.isPlaying) return;
+            if (!_playEditor && Application.isPlaying) return;
             EditorApplication.QueuePlayerLoopUpdate();
             graphic.SetVerticesDirty();
         }
