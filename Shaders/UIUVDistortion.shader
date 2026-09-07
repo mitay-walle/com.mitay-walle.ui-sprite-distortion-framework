@@ -90,6 +90,7 @@ Shader "UI/UV Distortion HDR"
                 float2 distortionUV : TEXCOORD1;
                 float4 worldPosition : TEXCOORD2;
                 float4 params : TEXCOORD3;
+                half4 mask : TEXCOORD4;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -102,6 +103,8 @@ Shader "UI/UV Distortion HDR"
             float4 _TextureHDRMultiplier;
             float4 _VertexColorHDRMultiplier;
             float _InvertAlpha;
+            float _UIMaskSoftnessX;
+            float _UIMaskSoftnessY;
 
             v2f vert(appdata_t v)
             {
@@ -111,6 +114,14 @@ Shader "UI/UV Distortion HDR"
 
                 OUT.worldPosition = v.vertex;
                 OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
+
+                float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
+                float2 pixelSize = OUT.vertex.w;
+                pixelSize /= abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+                OUT.mask = half4(
+                    v.vertex.xy * 2.0 - clampedRect.xy - clampedRect.zw,
+                    0.25 / (0.25 * half2(_UIMaskSoftnessX, _UIMaskSoftnessY) + abs(pixelSize.xy))
+                );
 
                 OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
                 OUT.params = v.texcoord1;
@@ -155,7 +166,8 @@ Shader "UI/UV Distortion HDR"
                 }
 
                 #ifdef UNITY_UI_CLIP_RECT
-                color.a *= UnityGet2DClipping(v.worldPosition.xy, _ClipRect);
+                half2 mask = saturate((_ClipRect.zw - _ClipRect.xy - abs(v.mask.xy)) * v.mask.zw);
+                color.a *= mask.x * mask.y;
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
