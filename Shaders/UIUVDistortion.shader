@@ -1,9 +1,12 @@
-Shader "UI/UV Distortion"
+Shader "UI/UV Distortion HDR"
 {
     Properties
     {
         [PerRendererData] _MainTex ("Main Texture", 2D) = "white" {}
         _DistortionTex ("Distortion Texture", 2D) = "black" {}
+
+        [HDR] _TextureHDRMultiplier ("Texture HDR Multiplier", Color) = (1,1,1,1)
+        [HDR] _VertexColorHDRMultiplier ("Vertex Color HDR Multiplier", Color) = (1,1,1,1)
 
         [Toggle]_InvertAlpha ("Invert Alpha", Float) = 0
         [HideInInspector]_StencilComp ("Stencil Comparison", Float) = 8
@@ -16,13 +19,13 @@ Shader "UI/UV Distortion"
 
         [HideInInspector][Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
 
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendRGB ("Src RGB", Float) = 5 // SrcAlpha
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendRGB ("Dst RGB", Float) = 10 // OneMinusSrcAlpha
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpRGB ("Op RGB", Float) = 0 // Add
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendRGB ("Src RGB", Float) = 5
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendRGB ("Dst RGB", Float) = 10
+        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpRGB ("Op RGB", Float) = 0
 
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendA ("Src A", Float) = 1 // One
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendA ("Dst A", Float) = 1 // One
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpA ("Op A", Float) = 0 // Add
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendA ("Src A", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendA ("Dst A", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpA ("Op A", Float) = 0
     }
 
     SubShader
@@ -82,7 +85,7 @@ Shader "UI/UV Distortion"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                fixed4 color : COLOR;
+                half4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
                 float2 distortionUV : TEXCOORD1;
                 float4 worldPosition : TEXCOORD2;
@@ -95,8 +98,10 @@ Shader "UI/UV Distortion"
 
             float4 _ClipRect;
             float4 _MainTex_ST;
-            float  _InvertAlpha;
             float4 _DistortionTex_ST;
+            float4 _TextureHDRMultiplier;
+            float4 _VertexColorHDRMultiplier;
+            float _InvertAlpha;
 
             v2f vert(appdata_t v)
             {
@@ -108,28 +113,25 @@ Shader "UI/UV Distortion"
                 OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
 
                 OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-
                 OUT.params = v.texcoord1;
 
                 float2 distortionUV = v.texcoord * (1.0 + OUT.params.w);
-
-                // Apply the Distortion Texture material Tiling and Offset explicitly.
-                distortionUV = distortionUV * _DistortionTex_ST.xy + _DistortionTex_ST.zw;
-
-                // Add animated and per-vertex offsets after material tiling,
-                // so changing Tiling does not change the scrolling speed.
                 float2 scrollOffset = float2(OUT.params.y, OUT.params.z) * _Time.y + v.texcoord2.xy;
-                OUT.distortionUV = distortionUV + scrollOffset;
+                OUT.distortionUV = TRANSFORM_TEX(distortionUV + scrollOffset, _DistortionTex);
 
-                if(_InvertAlpha > 0.5)
+                half4 vertexColor = v.color;
+                vertexColor *= _VertexColorHDRMultiplier;
+
+                if (_InvertAlpha > 0.5)
                 {
-                    OUT.color.rgb = v.color.rgb;
-                    OUT.color.a = 1 - v.color.a;
+                    OUT.color.rgb = vertexColor.rgb;
+                    OUT.color.a = 1.0 - v.color.a;
                 }
                 else
                 {
-                    OUT.color = v.color * v.color.a;
+                    OUT.color = vertexColor;
                 }
+
                 return OUT;
             }
 
@@ -138,16 +140,18 @@ Shader "UI/UV Distortion"
                 float4 distortionSample = tex2D(_DistortionTex, v.distortionUV);
                 float2 distortion = (distortionSample.rg - 0.5) * 2.0 * v.params.x;
                 float2 distortedUV = v.texcoord + distortion;
-                half4  color = tex2D(_MainTex, distortedUV);
 
-                if(_InvertAlpha > 0.5)
+                half4 color = tex2D(_MainTex, distortedUV);
+                color *= _TextureHDRMultiplier;
+
+                if (_InvertAlpha > 0.5)
                 {
                     color.rgb *= v.color.rgb;
-                    color.rgb = lerp(color.rgb, float4(1, 1, 1, 1), v.color.a);
+                    color.rgb = lerp(color.rgb, half3(1, 1, 1), v.color.a);
                 }
                 else
                 {
-                    color *= v.color * v.color.a;
+                    color *= v.color;
                 }
 
                 #ifdef UNITY_UI_CLIP_RECT
@@ -155,8 +159,13 @@ Shader "UI/UV Distortion"
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
-                clip (color.a - 0.001);
+                clip(color.a - 0.001);
                 #endif
+
+//color.a*=_TextureHDRMultiplier;
+				color = saturate(color);
+
+
 
                 return color;
             }
