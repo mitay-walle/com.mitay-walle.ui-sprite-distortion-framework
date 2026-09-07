@@ -18,6 +18,7 @@ Shader "UI/UV Distortion HDR"
         [HideInInspector]_ColorMask ("Color Mask", Float) = 15
 
         [HideInInspector][Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+        [HideInInspector] _RectMaskAffectsRGB ("RectMask Affects RGB", Float) = 0
 
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendRGB ("Src RGB", Float) = 5
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendRGB ("Dst RGB", Float) = 10
@@ -105,6 +106,7 @@ Shader "UI/UV Distortion HDR"
             float _InvertAlpha;
             float _UIMaskSoftnessX;
             float _UIMaskSoftnessY;
+            float _RectMaskAffectsRGB;
 
             v2f vert(appdata_t v)
             {
@@ -167,7 +169,13 @@ Shader "UI/UV Distortion HDR"
 
                 #ifdef UNITY_UI_CLIP_RECT
                 half2 mask = saturate((_ClipRect.zw - _ClipRect.xy - abs(v.mask.xy)) * v.mask.zw);
-                color.a *= mask.x * mask.y;
+                half clipFactor = mask.x * mask.y;
+
+                // Standard UI clipping fades alpha. Additive blending (One, One)
+                // ignores source alpha for RGB, so additive materials must also
+                // fade RGB or RectMask2D/Softness will not be visible.
+                color.a *= clipFactor;
+                color.rgb *= lerp(1.0h, clipFactor, saturate((half)_RectMaskAffectsRGB));
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
