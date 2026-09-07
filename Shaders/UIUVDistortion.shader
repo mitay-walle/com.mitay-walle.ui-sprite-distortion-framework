@@ -17,8 +17,13 @@ Shader "UI/UV Distortion HDR"
 
         [HideInInspector]_ColorMask ("Color Mask", Float) = 15
 
+        // RectMask2D values are supplied per CanvasRenderer.
+        // Wide default keeps the shader visible when no RectMask2D is present.
+        [PerRendererData][HideInInspector] _ClipRect ("Clip Rect", Vector) = (-32767,-32767,32767,32767)
+        [PerRendererData][HideInInspector] _UIMaskSoftnessX ("Mask Softness X", Float) = 0
+        [PerRendererData][HideInInspector] _UIMaskSoftnessY ("Mask Softness Y", Float) = 0
+
         [HideInInspector][Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
-        [HideInInspector] _RectMaskAffectsRGB ("RectMask Affects RGB", Float) = 0
 
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendRGB ("Src RGB", Float) = 5
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendRGB ("Dst RGB", Float) = 10
@@ -70,7 +75,6 @@ Shader "UI/UV Distortion HDR"
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
 
-            #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
             #pragma multi_compile_local _ UNITY_UI_ALPHACLIP
 
             struct appdata_t
@@ -106,7 +110,6 @@ Shader "UI/UV Distortion HDR"
             float _InvertAlpha;
             float _UIMaskSoftnessX;
             float _UIMaskSoftnessY;
-            float _RectMaskAffectsRGB;
 
             v2f vert(appdata_t v)
             {
@@ -167,16 +170,15 @@ Shader "UI/UV Distortion HDR"
                     color *= v.color;
                 }
 
-                #ifdef UNITY_UI_CLIP_RECT
-                half2 mask = saturate((_ClipRect.zw - _ClipRect.xy - abs(v.mask.xy)) * v.mask.zw);
-                half clipFactor = mask.x * mask.y;
+                // RectMask2D + Softness.
+                // Deliberately NOT wrapped in UNITY_UI_CLIP_RECT: some custom UI
+                // material paths do not enable that keyword, while CanvasRenderer
+                // still supplies _ClipRect and _UIMaskSoftnessX/Y.
+                half2 uiMask = saturate((_ClipRect.zw - _ClipRect.xy - abs(v.mask.xy)) * v.mask.zw);
+                half clipFactor = uiMask.x * uiMask.y;
 
-                // Standard UI clipping fades alpha. Additive blending (One, One)
-                // ignores source alpha for RGB, so additive materials must also
-                // fade RGB or RectMask2D/Softness will not be visible.
-                color.a *= clipFactor;
-                color.rgb *= lerp(1.0h, clipFactor, saturate((half)_RectMaskAffectsRGB));
-                #endif
+                // Fade both RGB and alpha so clipping is visible with additive blending too.
+                color *= clipFactor;
 
                 #ifdef UNITY_UI_ALPHACLIP
                 clip(color.a - 0.001);
